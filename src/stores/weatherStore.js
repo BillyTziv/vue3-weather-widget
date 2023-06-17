@@ -8,7 +8,7 @@ export const useWeatherStore = defineStore('weather', {
     error: null,
   }),
   actions: {
-    async fetchWeatherData() {
+    async fetchWeatherDataFromAPI() {
       try {
         const response = await fetch(`${baseURL}/data/2.5/onecall?lat=40.58725980318928&lon=22.948223362612612&exclude=hourly,minutely&appid=11b0499bd13ab56063de7565a440eb97&units=metric`);
         const data = await response.json();
@@ -16,6 +16,6 @@ export const useWeatherStore = defineStore('weather', {
       } catch (error) {
         this.error = error.message;
       }
-    },
+    }
   },
 });
