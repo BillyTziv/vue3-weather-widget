@@ -5,6 +5,9 @@ A simple weather widget in Vue3 using OpenWeatherMap,
 ---
 # Demo
 ---
+
+![alt text](demo_weather_widget.png)
+
 # Installation
 ---
 # API Documentation
