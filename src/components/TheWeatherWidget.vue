@@ -1,22 +1,31 @@
 <template>
   <div class="fullpage-bg h-screen flex justify-center items-center ">
     <div class="container mx-auto max-w-5xl p-5">
-      <!-- <h1 class="mb-4 text-4xl text-center font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
+     <h1 class="mb-4 text-4xl text-center font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
         Weather Widget
       </h1>
 
       <p class="mb-6 text-lg text-center font-normal text-gray-500 lg:text-xl sm:px-16 xl:px-48 dark:text-gray-400">
         - A simple widget made with Vue3 -
-      </p> -->
+      </p> 
 
       <section v-if="!isLoading">
         <div class="flex flex-wrap bg-white py-10 rounded-lg bg-opacity-30 px-4">
+          <!-- Current Weather -->
           <div class="flex flex-col md:flex-row w-full">
             <div class="flex flex-row">
-              <CurrentWeatherIcon :weather="selectedWeather.weather" />
-              <CurrentWeatherTemperature :temperature="selectedWeather.temp" />
+              <!-- Current Weather Icon -->
+              <CurrentWeatherIcon
+                :weather="selectedWeather.weather"
+              />
+
+              <!-- Current Weather Teamperature -->
+              <CurrentWeatherTemperature
+                :temperature="selectedWeather.temp"
+              />
             </div>
            
+            <!-- Current Weather Details -->
             <CurrentWeatherDetails
               :feelsLike="selectedWeather.feels_like"
               :pressure="selectedWeather.pressure"
@@ -27,18 +36,25 @@
             />
           </div>
 
+          <!-- Max Temperature Line Chart -->
           <div class="flex w-full">
-            <TemperatureLineChart :maxTemperatures="maxTemperatures" />
+            <TemperatureLineChart
+              :maxTemperatures="maxTemperatures"
+            />
           </div>
 
+          <!-- Day Picker -->
           <div class="mt-5 overflow-x-auto">
-            <DayPicker :forecastWeather="forecastWeather" @selectedDate="handleSelectedDate" />
+            <DayPicker
+              :forecastWeather="forecastWeather"
+              @selectedDate="handleSelectedDate"
+            />
           </div>
         </div>
       </section>
 
       <section v-else>
-        <!-- Add Some Loading Shimmering Effect -->
+        <!-- Loading Effect -->
       </section>
     </div>
   </div>
@@ -58,16 +74,14 @@
   import DayPicker from './TheDayPicker.vue'
   import TemperatureLineChart from './charts/TheTemperatureLineChart.vue'
 
+  import cloneDeep from 'lodash/cloneDeep';
+
   const weatherStore = useWeatherStore();
+  const isLoading = ref(true);
 
-  // Used to display the selected weather data.
   const selectedWeather = ref(null);
-
-  // const currentWeather = ref({});
   const forecastWeather = ref({});
   const maxTemperatures = ref([]);
-
-  const isLoading = ref(true);
 
   const getCurrentWeatherData = async () => {
 		isLoading.value = true;
@@ -90,28 +104,23 @@
 	};
 
   function getForecastWeatherDataByDate( selectedDate ) {
+    let filteredForecastedWeather = cloneDeep(forecastWeather.value).find(item => selectedDate === item.dt);
 
-    let filteredForcastedWeather = JSON.parse(JSON.stringify(forecastWeather.value)).filter( ( item ) => {
-      if( selectedDate === item.dt ) {
-        return item;
-      }
+    // Selected date is not available.
+    if( !selectedWeather.value ) {
+      console.error("You have selected an invalid date.");
+      return;
+    }
+
+    filteredForecastedWeather.temp = filteredForecastedWeather.temp.eve;
+    filteredForecastedWeather.feels_like = filteredForecastedWeather.feels_like.eve;
+
+    selectedWeather.value = filteredForecastedWeather;
+
+    // Mark selected date, so that we can add some style later.
+    forecastWeather.value.forEach(item => {
+      item.selected = (item.dt === selectedDate);
     });
-
-    filteredForcastedWeather = filteredForcastedWeather[0];
-    filteredForcastedWeather.temp = filteredForcastedWeather.temp.eve;
-
-    filteredForcastedWeather.feels_like = filteredForcastedWeather.feels_like.eve;
-
-    selectedWeather.value = filteredForcastedWeather;
-
-    forecastWeather.value = forecastWeather.value.map( (item) => {
-      if( item.dt === selectedDate ) {
-        item.selected = true;
-      }else {
-        item.selected = false;
-      }
-      return item;
-    })
 	};
 
   const handleSelectedDate = ( date ) => {
